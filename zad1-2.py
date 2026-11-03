@@ -160,7 +160,7 @@ def wypisz_macierz(macierz):
         for wiersz in macierz:
             print(*wiersz)
 
-def wizualizuj_graf(n, krawedzie):
+def wizualizuj_graf(n, krawedzie, tytul="Wizualizacja grafu prostego"):
 
     if n == 0:
         print("Graf nie ma wierzchołków.")
@@ -215,7 +215,7 @@ def wizualizuj_graf(n, krawedzie):
             zorder=3
         )
 
-    ax.set_title("Wizualizacja grafu prostego")
+    ax.set_title(tytul)
     ax.set_aspect("equal")
     ax.axis("off")
 
