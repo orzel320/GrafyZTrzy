@@ -1,91 +1,161 @@
-import random  # Losowanie końców mostów i wag.
-import runpy  # Pozwala użyć pliku, który ma myślnik w nazwie.
-import matplotlib.pyplot as plt  # Okienko z rysunkiem, tak jak w zestawie 1.
-import networkx as nx  # Tylko rozmieszczenie i rysowanie grafu, nie obliczanie wyników.
-from pathlib import Path  # Znalezienie starego pliku obok tego programu.
-from zad3 import generuj_gnp  # Oryginalny generator z pierwszego zestawu.
-from zestaw2.z2 import get_components  # Oryginalne znajdowanie składowych.
+import random 
+import runpy  
+import matplotlib.pyplot as plt  
+import networkx as nx  
+from matplotlib.transforms import Bbox  
+from pathlib import Path  
+from zad3 import generuj_gnp  
+from zestaw2.z2 import get_components  
 
-# Zwykły import nie obsługuje nazwy zad1-2, dlatego ten jeden plik ładujemy tak.
 stary_kod = runpy.run_path(str(Path(__file__).with_name("zad1-2.py")))
-konwertuj = stary_kod["konwertuj"]  # Nie piszemy ponownie konwersji krawędzi.
-wypisz_macierz = stary_kod["wypisz_macierz"]  # Nie powielamy drukowania macierzy.
+konwertuj = stary_kod["konwertuj"]  
+wypisz_macierz = stary_kod["wypisz_macierz"] 
 
 
 def sprawdz_graf(w):
     """Sprawdź macierz przed obliczeniami. Nie wymaga spójności."""
-    if not isinstance(w, list) or len(w) == 0:  # Pusty graf nie ma centrum ani źródła.
+    if not isinstance(w, list) or len(w) == 0:  
         raise ValueError("Graf musi mieć przynajmniej jeden wierzchołek.")
-    n = len(w)  # Liczba wierszy jest liczbą wierzchołków.
-    for wiersz in w:  # Najpierw sprawdzamy rozmiary wszystkich wierszy.
+    n = len(w)  
+    for wiersz in w:  
         if not isinstance(wiersz, list) or len(wiersz) != n:
             raise ValueError("Macierz musi być kwadratowa.")
-    for u in range(n):  # Przeglądamy każdy wiersz.
-        for v in range(n):  # Przeglądamy każdą kolumnę.
-            if type(w[u][v]) is not int or w[u][v] < 0:  # bool także jest odrzucany.
+    for u in range(n):  
+        for v in range(n):  
+            if type(w[u][v]) is not int or w[u][v] < 0:  
                 raise ValueError("W macierzy mogą być tylko nieujemne liczby całkowite.")
-            if u == v and w[u][v] != 0:  # Graf prosty nie ma pętli.
+            if u == v and w[u][v] != 0:  
                 raise ValueError("Na przekątnej muszą być zera.")
-            if w[u][v] != w[v][u]:  # Waga musi być jednakowa w obu kierunkach.
+            if w[u][v] != w[v][u]:  
                 raise ValueError("Macierz musi być symetryczna.")
 
 
 def generuj_graf(n, p):
     """Wylosuj graf starym kodem, połącz jego składowe i nadaj wagi."""
-    if type(n) is not int or n < 1:  # Obsługujemy również n=1.
+    if type(n) is not int or n < 1:  
         raise ValueError("Liczba wierzchołków musi być całkowita i dodatnia.")
-    if type(p) not in (int, float) or not 0 <= p <= 1:  # Odrzuca także NaN i nieskończoność.
+    if type(p) not in (int, float) or not 0 <= p <= 1:  
         raise ValueError("Prawdopodobieństwo musi należeć do [0, 1].")
-    krawedzie = generuj_gnp(n, p)  # Ponowne użycie oryginalnego generatora.
-    w, macierz_incydencji, lista = konwertuj(n, krawedzie)  # Stara konwersja daje macierz i sąsiadów.
-    sasiedzi = {}  # Stary get_components oczekuje słownika.
-    for u in range(n):  # Uwzględniamy także izolowane wierzchołki.
-        sasiedzi[u] = lista[u]  # Nie implementujemy drugiego przeszukiwania grafu.
-    skladowe = get_components(sasiedzi)  # Każda pozycja to osobna składowa.
-    for i in range(1, len(skladowe)):  # Łączymy kolejne składowe w łańcuch.
-        u = random.choice(skladowe[i - 1])  # Losowy wierzchołek poprzedniej składowej.
-        v = random.choice(skladowe[i])  # Losowy wierzchołek następnej składowej.
-        w[u][v] = 1  # Dodajemy most między składowymi.
-        w[v][u] = 1  # Graf jest nieskierowany.
-    for u in range(n):  # Nadajemy wagi wszystkim istniejącym krawędziom.
-        for v in range(u + 1, n):  # Każdą krawędź losujemy tylko raz.
-            if w[u][v] != 0:  # Zero oznacza brak krawędzi.
-                waga = random.randint(1, 10)  # Obie granice przedziału są włączone.
-                w[u][v] = waga  # Waga w jednym kierunku.
-                w[v][u] = waga  # Ta sama waga w drugim kierunku.
-    return w  # Zwykła lista list, bez klas ani dodatkowego obiektu grafu.
+    krawedzie = generuj_gnp(n, p)  
+    w, macierz_incydencji, lista = konwertuj(n, krawedzie)  
+    sasiedzi = {}  
+    for u in range(n):  
+        sasiedzi[u] = lista[u]  
+    skladowe = get_components(sasiedzi)  
+    for i in range(1, len(skladowe)):  
+        u = random.choice(skladowe[i - 1])  
+        v = random.choice(skladowe[i])  
+        w[u][v] = 1  
+        w[v][u] = 1  
+    for u in range(n):  
+        for v in range(u + 1, n):  
+            if w[u][v] != 0:  
+                waga = random.randint(1, 10)  
+                w[u][v] = waga  
+                w[v][u] = waga  
+    return w  
+
+
+def rozmiesc_wagi(graf, polozenia, osie):
+    """Umieść wagi bez nakładania napisów; zwróć te, które nie zmieściły się."""
+    figura = osie.figure  
+    figura.canvas.draw()  
+    renderer = figura.canvas.get_renderer() 
+    zajete = []  
+    punkty = {}
+    promien = 22 * figura.dpi / 100  
+    for v in graf.nodes():
+        x, y = osie.transData.transform(polozenia[v])
+        punkty[v] = (x, y)
+        zajete.append(Bbox.from_bounds(x - promien, y - promien, 2 * promien, 2 * promien))
+    brak_miejsca = []  
+    for u, v, dane in graf.edges(data=True):
+        napis = osie.text(0, 0, str(dane["weight"]), ha="center", va="center",
+                          fontsize=10, zorder=5,
+                          bbox=dict(facecolor="white", edgecolor="none", pad=1.5))
+        najlepsze = None 
+        najlepszy_odstep = -1 
+        for krok in range(6, 35):  
+            t = krok / 40  
+            x = (1 - t) * polozenia[u][0] + t * polozenia[v][0]
+            y = (1 - t) * polozenia[u][1] + t * polozenia[v][1]
+            napis.set_position((x, y))  
+            prostokat = napis.get_window_extent(renderer).padded(4 * figura.dpi / 100)
+            kolizja = False
+            for inny in zajete:
+                if prostokat.overlaps(inny):  
+                    kolizja = True
+                    break
+            if kolizja:
+                continue  
+            px, py = osie.transData.transform((x, y))
+            odstep = float("inf")
+            for a, b in graf.edges():  
+                if (a, b) == (u, v):
+                    continue  
+                ax, ay = punkty[a]
+                bx, by = punkty[b]
+                dx, dy = bx - ax, by - ay
+                dlugosc2 = dx * dx + dy * dy  
+                rzut = 0
+                if dlugosc2 > 0:
+                    rzut = ((px - ax) * dx + (py - ay) * dy) / dlugosc2
+                rzut = max(0, min(1, rzut))  
+                odleglosc2 = (px - ax - rzut * dx) ** 2 + (py - ay - rzut * dy) ** 2
+                odstep = min(odstep, odleglosc2) 
+            if najlepsze is None or odstep > najlepszy_odstep:
+                najlepsze = (x, y)
+                najlepszy_odstep = odstep
+        if najlepsze is None:  
+            napis.remove()
+            brak_miejsca.append((u + 1, v + 1, dane["weight"]))
+        else:
+            napis.set_position(najlepsze)
+            zajete.append(napis.get_window_extent(renderer).padded(4 * figura.dpi / 100))
+    return brak_miejsca 
 
 
 def wizualizuj_graf(w, tytul="Zadanie 1: graf z wagami", drzewo=None):
     """Otwórz okno z grafem; po podaniu drzewa rysuj tylko jego krawędzie."""
-    sprawdz_graf(w)  # Korzystamy z tej samej kontroli macierzy.
-    n = len(w)  # Zachowujemy także wierzchołek bez krawędzi przy n=1.
-    graf = nx.Graph()  # Pomocniczy obiekt biblioteki służy wyłącznie do rysowania.
-    graf.add_nodes_from(range(n))  # Wszystkie wierzchołki muszą być na rysunku.
-    if drzewo is None:  # Zadanie 1: wszystkie krawędzie grafu.
-        for u in range(n):
-            for v in range(u + 1, n):  # Każda nieskierowana krawędź tylko raz.
+    sprawdz_graf(w)  
+    n = len(w) 
+    graf = nx.Graph() 
+    graf.add_nodes_from(range(n))
+    if drzewo is None:  
+       for u in range(n):
+            for v in range(u + 1, n):  
                 if w[u][v] > 0:
-                    graf.add_edge(u, v, weight=w[u][v])  # Zapamiętujemy wagę do podpisu.
-    else:  # Zadanie 5: tylko krawędzie znalezione przez nasz algorytm Prima.
+                    graf.add_edge(u, v, weight=w[u][v])  
+    else:  
         for u, v, waga in drzewo:
             graf.add_edge(u, v, weight=waga)
-    polozenia = nx.circular_layout(graf)  # Układ na okręgu, jak w zestawie 1.
-    podpisy = {}  # Na ekranie pokazujemy numery od 1.
+    polozenia = nx.circular_layout(graf)  
+    podpisy = {}  
     for v in range(n):
         podpisy[v] = v + 1
-    wagi = nx.get_edge_attributes(graf, "weight")  # Podpisy krawędzi to ich wagi.
-    kolor = "gray"  # Zwykły graf ma szare krawędzie.
+    kolor = "gray"  
     if drzewo is not None:
-        kolor = "royalblue"  # Krawędzie drzewa wyróżniamy na niebiesko.
-    plt.figure(figsize=(8, 8))  # Każde wywołanie tworzy nowe okno.
+        kolor = "royalblue"
+    plt.figure(figsize=(10, 10))  
+    osie = plt.gca()  
     nx.draw_networkx(graf, polozenia, labels=podpisy, node_color="skyblue",
                      node_size=650, edgecolors="black", edge_color=kolor,
-                     width=2, font_size=11)  # Wierzchołki, numery i krawędzie.
-    nx.draw_networkx_edge_labels(graf, polozenia, edge_labels=wagi,
-                                font_size=10, rotate=False)  # Wagi obok krawędzi.
-    plt.title(tytul)  # Nazwa zadania nad rysunkiem.
-    plt.axis("off")  # Osie liczbowe nie są potrzebne do grafu.
-    plt.margins(0.15)  # Zostawiamy miejsce wokół skrajnych wierzchołków.
-    plt.tight_layout()  # Dopasowanie rysunku do okna.
-    plt.show()  # Program czeka na zamknięcie okna, potem wraca do menu.
+                     width=2, font_size=11) 
+    plt.title(tytul)  
+    plt.axis("off")  
+    plt.margins(0.15)  
+    plt.tight_layout()  
+    plt.subplots_adjust(top=0.90)  
+    brak_miejsca = rozmiesc_wagi(graf, polozenia, osie)  
+    if brak_miejsca:
+        osie.set_title(tytul + "\nCzęść wag w dodatkowym oknie: lista krawędzi", fontsize=11)
+        for poczatek in range(0, len(brak_miejsca), 25):  
+            plt.figure(figsize=(6, 8))
+            plt.axis("off")
+            plt.title("Wagi bez miejsca na rysunku — strona " + str(poczatek // 25 + 1))
+            tekst = "Krawędź       Waga\n\n"
+            for u, v, waga in brak_miejsca[poczatek:poczatek + 25]:
+                tekst += str(u) + " -- " + str(v) + "          " + str(waga) + "\n"
+            plt.text(0.05, 0.95, tekst, va="top", fontsize=12, transform=plt.gca().transAxes)
+            plt.tight_layout()
+    plt.show() 

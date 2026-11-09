@@ -5,7 +5,6 @@ import colorsys
 import networkx as nx
 import matplotlib.pyplot as plt
 
-# funkcja wizualizujaca
 def draw_graph(adj, title="Graf", node_colors=None):
     """Rysuje graf na podstawie listy sąsiedztwa w układzie okrągłym."""
     G = nx.Graph()
@@ -33,6 +32,12 @@ def draw_graph(adj, title="Graf", node_colors=None):
 
 def degree_seq(A):
     seq = sorted(A, reverse=True)
+    liczba_nieparzystych = 0
+    for stopien in A:
+        if stopien % 2 != 0:
+            liczba_nieparzystych += 1
+    if liczba_nieparzystych % 2 != 0:
+        return False
     while True:
         if all(x == 0 for x in seq):
             return True

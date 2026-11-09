@@ -1,23 +1,21 @@
-"""Uruchom ten plik. Jeden wylosowany graf jest wspólny dla wszystkich zadań."""
-
-from z3_zad1 import generuj_graf, wypisz_macierz, wizualizuj_graf  # Zadanie 1 i prezentacja.
-from z3_zad2 import wypisz_sciezki  # Zadanie 2.
-from z3_zad3 import macierz_odleglosci  # Zadanie 3.
-from z3_zad4 import wypisz_centra  # Zadanie 4.
-from z3_zad5 import wypisz_drzewo  # Zadanie 5.
+from z3_zad1 import generuj_graf, wypisz_macierz, wizualizuj_graf  
+from z3_zad2 import wypisz_sciezki 
+from z3_zad3 import macierz_odleglosci  
+from z3_zad4 import wypisz_centra  
+from z3_zad5 import wypisz_drzewo  
 
 
 def main():
-    try:  # Błędne dane wejściowe pokażemy jako krótki komunikat.
+    try:  
         n = int(input("Liczba wierzchołków: "))
         p = float(input("Prawdopodobieństwo krawędzi: "))
-        w = generuj_graf(n, p)  # Losowanie następuje tylko raz.
+        w = generuj_graf(n, p)  
     except ValueError as blad:
         print("Błąd:", blad)
-        return  # Bez poprawnego grafu nie przechodzimy do menu.
+        return  
 
-    odleglosci = None  # Macierz obliczymy dopiero przy zadaniu 3 lub 4.
-    while True:  # Kolejne zadania korzystają z tej samej macierzy wag w.
+    odleglosci = None  
+    while True:  
         print("\n1 - graf z wagami")
         print("2 - najkrótsze ścieżki")
         print("3 - macierz odległości")
