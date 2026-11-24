@@ -12,9 +12,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# ---------------------------------------------------------------------------
 # Zadanie 1. PageRank
-# ---------------------------------------------------------------------------
 
 GRAPH = {
     "A": ["E", "F", "I"],
@@ -33,7 +31,6 @@ GRAPH = {
 
 
 def pagerank_power(graph=GRAPH, d=0.15, tol=1e-12, max_iter=10000):
-    """PageRank przez iterację wektora wierszowego p_(t+1) = p_t P."""
     nodes = list(graph)
     n = len(nodes)
     index = {v: i for i, v in enumerate(nodes)}
@@ -59,7 +56,6 @@ def pagerank_power(graph=GRAPH, d=0.15, tol=1e-12, max_iter=10000):
 
 
 def pagerank_random_walk(graph=GRAPH, d=0.15, steps=1_000_000, seed=42):
-    """PageRank jako częstość odwiedzin w losowym spacerze z teleportacją."""
     rng = random.Random(seed)
     nodes = list(graph)
     n = len(nodes)
@@ -83,9 +79,7 @@ def print_ranking(title, ranking):
         print(f"{place:2}. {node}  PageRank = {score:.6f}")
 
 
-# ---------------------------------------------------------------------------
 # Zadanie 2. TSP – symulowane wyżarzanie + ruch 2-opt
-# ---------------------------------------------------------------------------
 
 def cycle_length(route, coords):
     points = coords[np.asarray(route, dtype=int)]
@@ -94,10 +88,6 @@ def cycle_length(route, coords):
 
 def two_opt_annealing(coords, initial_route=None, levels=100, iterations=3000,
                       t_start=20.0, t_end=0.03, seed=42):
-    """
-    Jedna seria symulowanego wyżarzania.
-    Ruch 2-opt: (a,b),(c,d) -> (a,c),(b,d), z odwróceniem fragmentu trasy.
-    """
     rng = random.Random(seed)
     n = len(coords)
     route = list(range(n)) if initial_route is None else list(initial_route)
