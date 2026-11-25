@@ -1,8 +1,10 @@
 import heapq
 import math
+
 import matplotlib.pyplot as plt
 from zad1 import wizualizuj_digraf
-from zad3 import waliduj_digraf_wazony, bellman_ford
+
+from zad3 import bellman_ford, waliduj_digraf_wazony
 
 
 def dijkstra(n, wagi_nieujemne, start):
@@ -85,7 +87,7 @@ def wypisz_macierz_odleglosci(D, od_jedynki=True):
 
 
 def wizualizuj_przewazenie(n, wagi, wagi_przewazone, h, od_jedynki=True):
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13.5, 6.5))
+    _fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13.5, 6.5))
     luki = list(wagi.keys())
     wizualizuj_digraf(n, luki, wagi=wagi, tytul="Przed przeważeniem (wagi w)", od_jedynki=od_jedynki, ax=ax1)
     wizualizuj_digraf(

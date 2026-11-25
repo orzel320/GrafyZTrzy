@@ -1,12 +1,13 @@
 import math
 import random
+
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch
 
 
 def _sprawdz_int(x, nazwa):
     if not isinstance(x, int) or isinstance(x, bool):
-        raise ValueError(f"{nazwa} musi być liczbą całkowitą.")
+        raise TypeError(f"{nazwa} musi być liczbą całkowitą.")
 
 
 def waliduj_digraf(n, luki, dozwolone_petle=False):
@@ -206,7 +207,7 @@ def wizualizuj_digraf(n, luki, wagi=None, kolory=None, tytul="Digraf", od_jedynk
             ax.text(
                 xm, ym, str(w), ha="center", va="center", fontsize=9.5, fontweight="bold",
                 color="#b30000" if w < 0 else "#1a1a1a",
-                bbox=dict(boxstyle="round,pad=0.18", fc="white", ec="#ffffff", lw=0.6, alpha=1.0),
+                bbox={"boxstyle": "round,pad=0.18", "fc": "white", "ec": "#ffffff", "lw": 0.6, "alpha": 1.0},
                 zorder=4,
             )
 

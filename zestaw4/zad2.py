@@ -1,4 +1,5 @@
 import sys
+
 import matplotlib.pyplot as plt
 from zad1 import waliduj_digraf
 
