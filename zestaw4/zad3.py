@@ -1,6 +1,7 @@
 import math
 import random
-from zad1 import waliduj_digraf, generuj_digraf_gnp
+
+from zad1 import generuj_digraf_gnp, waliduj_digraf
 from zad2 import czy_silnie_spojny
 
 
@@ -39,7 +40,6 @@ def wczytaj_digraf_wazony(nazwa, od_jedynki=True, dozwolone_petle=True):
     pierwsza = linie[0].split()
     baza = 1 if od_jedynki else 0
 
-    # 1. Lista łuków ważonych: "n m", potem m wierszy "u v w"
     if len(pierwsza) == 2 and all(t.isdigit() for t in pierwsza):
         n, m = int(pierwsza[0]), int(pierwsza[1])
         if len(linie) != m + 1:
@@ -55,7 +55,6 @@ def wczytaj_digraf_wazony(nazwa, od_jedynki=True, dozwolone_petle=True):
             wagi[luk] = _parsuj_wage(tok[2])
         return n, waliduj_digraf_wazony(n, wagi, dozwolone_petle=dozwolone_petle)
 
-    # 2. Macierz wag n x n (brak łuku oznaczony przez '.' lub 'inf')
     n = len(linie)
     wagi = {}
     for i, linia in enumerate(linie):
